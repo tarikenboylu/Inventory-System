@@ -1,6 +1,7 @@
 using UnityEngine;
 using static Item;
 using static ItemContainerData;
+using static InventorySettings;
 
 //[CreateAssetMenu(fileName = "New Item Template", menuName = "Item")]
 public class ItemTemplate : ScriptableObject
@@ -21,8 +22,8 @@ public class ItemTemplate : ScriptableObject
     private static void CreateWithRandomName()
     {
         ItemTemplate template = UnityEditor.ObjectFactory.CreateInstance<ItemTemplate>();
-        string directory = "Assets/Resources/Item Datas";
-        int currentIndex = Resources.LoadAll<ItemTemplate>("Item Datas").Length;
+        string directory = "Assets/Resources/Inventory/Item Datas";
+        int currentIndex = Resources.LoadAll<ItemTemplate>("Inventory/Item Datas").Length;
         string assetName = $"NewAssetName{currentIndex}.asset";
         string path = System.IO.Path.Combine(directory, assetName);
         template.id = currentIndex;
@@ -110,7 +111,7 @@ public class ItemTemplate : ScriptableObject
         public AttributeTemplate[] possibleAttributes;
         public AttributeTemplate[] characteristicAttributes;
 
-        public int[] upgradeCost;//Probably it should be static values
+        public int[] upgradeCost;//Probably this should be static values
     }
 
     [System.Serializable]

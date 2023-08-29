@@ -1,7 +1,7 @@
 using System.Collections;
 using TMPro;
 using UnityEngine;
-using UnityEngine.UIElements;
+using static InventorySettings;
 
 public class CursorInfo : MonoSingleton<CursorInfo>
 {
@@ -13,8 +13,7 @@ public class CursorInfo : MonoSingleton<CursorInfo>
     [SerializeField] private Color SetTextColor;
     [SerializeField] private Color LegendaryTextColor;
 
-    private Rect panelRect => GetComponent<RectTransform>().rect;
-
+    private Rect panelRect;
     private static Color CommonItemColor;
     private static Color UncommonItemColor;
     private static Color RareItemColor;
@@ -27,21 +26,23 @@ public class CursorInfo : MonoSingleton<CursorInfo>
     private static Transform InfoTransform;
     private static CanvasGroup canvas;
 
-    private static string RarityColorHash(Item.Rarity rarity)
+    private static string RarityColorHash(Rarity rarity)
     {
         return rarity switch
         {
-            Item.Rarity.Uncommon => ColorUtility.ToHtmlStringRGBA(UncommonItemColor),
-            Item.Rarity.Rare => ColorUtility.ToHtmlStringRGBA(RareItemColor),
-            Item.Rarity.Set => ColorUtility.ToHtmlStringRGBA(UniqueItemColor),
-            Item.Rarity.Unique => ColorUtility.ToHtmlStringRGBA(SetItemColor),
-            Item.Rarity.Legendary => ColorUtility.ToHtmlStringRGBA(LegendaryItemColor),
+            Rarity.Uncommon => ColorUtility.ToHtmlStringRGBA(UncommonItemColor),
+            Rarity.Rare => ColorUtility.ToHtmlStringRGBA(RareItemColor),
+            Rarity.Set => ColorUtility.ToHtmlStringRGBA(UniqueItemColor),
+            Rarity.Unique => ColorUtility.ToHtmlStringRGBA(SetItemColor),
+            Rarity.Legendary => ColorUtility.ToHtmlStringRGBA(LegendaryItemColor),
             _ => ColorUtility.ToHtmlStringRGBA(CommonItemColor)
         };
     }
 
     private void OnEnable()
     {
+        panelRect = GetComponent<RectTransform>().rect;
+
         CommonItemColor = CommonTextColor;
         UncommonItemColor = UncommonTextColor;
         RareItemColor = RareTextColor;
@@ -79,7 +80,7 @@ public class CursorInfo : MonoSingleton<CursorInfo>
         yield return null;
     }
 
-    public static void Initialize(string ItemName, Item.Rarity rarity, Attribute[] attribute)
+    public static void Initialize(string ItemName, Rarity rarity, Attribute[] attribute)
     {
         if (tempInfo != null)
             foreach (var info in tempInfo) Destroy(info);

@@ -1,11 +1,9 @@
-using System.Collections;
-using System.Collections.Generic;
-using System.Security.Cryptography;
 using TMPro;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using static ItemContainerData;
+using static InventorySettings;
+
 public class Item : MonoBehaviour
 {
     [SerializeField] private TextMeshProUGUI levelText;
@@ -36,11 +34,11 @@ public class Item : MonoBehaviour
         durability = data.durability;
         upgradeLevel = data.upgradeLevel;
         ID = data.ID;
-        rarity = (Item.Rarity)data.rarity;
+        rarity = (Rarity)data.rarity;
         UpdateItem();
     }
 
-    public void UpdateItem()
+    private void UpdateItem()
     {
         GetComponent<Image>().color = template.itemUIColor;
         levelText.text = "+" + upgradeLevel;
@@ -50,16 +48,6 @@ public class Item : MonoBehaviour
     {
         upgradeLevel += amount;
         UpdateItem();
-    }
-
-    public enum Rarity
-    {
-        Common,
-        Uncommon,
-        Rare,
-        Set,
-        Unique,
-        Legendary
     }
 
     public enum ItemType

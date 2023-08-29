@@ -1,13 +1,8 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
-using System.Reflection;
-using System.Security.Cryptography;
-using Unity.VisualScripting.Antlr3.Runtime.Misc;
 using UnityEngine;
-using static UnityEditor.Progress;
+using static InventorySettings;
 
 public class Inventory : MonoBehaviour
 {
@@ -75,7 +70,7 @@ public class Inventory : MonoBehaviour
     public void AddItem(ItemTemplate template, int _amount = 1)
     {
         ItemContainerData data = new() { amount = _amount, item = template.CreateNewItem() };
-        int index = ConvenientSlotIndex(data.item.ID, (Item.Rarity)data.item.rarity);
+        int index = ConvenientSlotIndex(data.item.ID, (Rarity)data.item.rarity);
 
         if (index == -1)
         {
@@ -90,7 +85,7 @@ public class Inventory : MonoBehaviour
             SlotList[index].AddToSlot(_amount);
     }
 
-    public void RemoveItem(int _id, Item.Rarity _rarity, int _amount = 1)
+    public void RemoveItem(int _id, Rarity _rarity, int _amount = 1)
     {
         Debug.Assert(ItemCount(_id, _rarity) < _amount, "Item is not enough ");
 
@@ -136,7 +131,7 @@ public class Inventory : MonoBehaviour
     }
 
     /// <returns>First same countable item or empty slot index</returns>
-    private int ConvenientSlotIndex(int _id, Item.Rarity _rarity)
+    private int ConvenientSlotIndex(int _id, Rarity _rarity)
     {
         //if item exist in inventory return item slot index
         for (int i = 0; i < Slot_Count; i++)
@@ -156,7 +151,7 @@ public class Inventory : MonoBehaviour
         return -1;
     }
 
-    private int ItemCount(int _id, Item.Rarity _rarity)
+    private int ItemCount(int _id, Rarity _rarity)
     {
         int count = 0;
 

@@ -2,7 +2,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
-using static UnityEditor.Progress;
+using static InventorySettings;
 
 [RequireComponent(typeof(CanvasGroup))]
 public class ItemSlotContainer : MonoBehaviour, IBeginDragHandler, IEndDragHandler, IDragHandler, /*IPointerDownHandler,*/ IPointerExitHandler
@@ -15,7 +15,7 @@ public class ItemSlotContainer : MonoBehaviour, IBeginDragHandler, IEndDragHandl
     public TextMeshProUGUI amountText;
     public bool isDraggable = true;
     public bool Convenient => item.maxStackCount > amount && item.countable;
-    public bool Equality(int id, Item.Rarity rarity)
+    public bool Equality(int id, Rarity rarity)
     {
         if (item == null) return false;
 
@@ -48,6 +48,7 @@ public class ItemSlotContainer : MonoBehaviour, IBeginDragHandler, IEndDragHandl
 
         item = Instantiate(InventorySystemManager.itemPrefab, transform);
         amount = data.amount;
+        UpdateSlot();
     }
 
     public void AddToSlot(int _amount)
@@ -75,10 +76,13 @@ public class ItemSlotContainer : MonoBehaviour, IBeginDragHandler, IEndDragHandl
     {
         amountText.text = amount > 1 && item != null ? amount.ToString() : "";
 
-        if (item != null)
-            border.sprite = InventorySystemManager.GetBorder(item.rarity);
-        else
+        if (item == null)
+        {
             border.color = Color.clear;
+            return;
+        }
+
+        border.color = RarityColor(item.rarity);
     }
 
     public void ClearSlot()

@@ -1,15 +1,16 @@
-using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
 public class AttributeInfo : MonoBehaviour
 {
+    //Cursor Info has as many as attributes that item has
+    //This designs a attributes in cursor info window
+
     [SerializeField] private TextMeshProUGUI nameText;
     [SerializeField] private TextMeshProUGUI valueText;
 
     [Header("Settings")]
-    [SerializeField ]private Color NormalItemColor = Color.white;
+    [SerializeField] private Color NormalItemColor = Color.white;
     [SerializeField] private Color SetItemColor = Color.green;
     [SerializeField] private Color UpgradableColor = Color.yellow;
     [SerializeField] private Color IncrementColor = Color.red;

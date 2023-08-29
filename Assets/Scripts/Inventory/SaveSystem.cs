@@ -1,8 +1,7 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.IO;
+
 public static class SaveSystem
 {
     public static void Save<T>(T _obj, string saveFileName) where T : class

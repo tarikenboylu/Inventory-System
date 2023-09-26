@@ -1,53 +1,72 @@
 using System.Collections;
 using System.Collections.Generic;
-using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 using UnityEngine.EventSystems;
+using static InventorySettings;
+using TMPro;
 
 public class InventorySlot : Slot
 {
-    private ItemSlotContainer container;
-
     public Inventory inventory;
 
-    private IEnumerator Start()
+    [SerializeField] private Image border;
+    [SerializeField] private TextMeshProUGUI StackText;
+    public bool isDraggable = true;
+    public int index;
+
+    /// <summary>
+    /// Refresh UI
+    /// </summary>
+    public void RefreshSlot(ItemData _itemData, int Stack = 0)
     {
-        if (container == null) container = Instantiate(InventorySystemManager.containerPrefab, transform);
+        base.RefreshSlot(_itemData);
 
-        yield return new WaitForEndOfFrame();
+        if (_itemData == null)
+        {
+            border.color = Color.clear;
+            SetStackText(0);
 
-        container.slot = this;
-        inventory.SlotList[transform.GetSiblingIndex()] = container;
+            return;
+        }
+
+        border.color = RarityColor((Rarity)_itemData.rarity);
+        SetStackText(Stack);
+    }
+
+    private void SetStackText(int amount) => StackText.text = amount > 1 ? amount.ToString() : "";
+
+    public override void ClearSlot()
+    {
+        base.ClearSlot();
+        SetStackText(0);
     }
 
     public override void OnDrop(PointerEventData eventData)
     {
-        if (eventData.pointerDrag != null)
+        if (eventData.pointerDrag == null) return;
+
+        if (eventData.pointerDrag.TryGetComponent(out Item DroppedItem))
         {
-            Debug.Log(eventData.pointerDrag);
-
-            if (eventData.pointerDrag.TryGetComponent(out ItemSlotContainer DroppedItem))
+            if (DroppedItem.slot.TryGetComponent(out InventorySlot slot_Inventory))
             {
-                if (DroppedItem.slot.TryGetComponent(out InventorySlot _slot))
+                if (slot_Inventory.inventory == inventory)
+                    inventory.SwapSlots(slot_Inventory.index, index);
+                else
                 {
-                    int index2 = _slot.transform.GetSiblingIndex();
-                    int index1 = transform.GetSiblingIndex();
-
-                    Debug.Log(DroppedItem.item);
-
-                    ItemContainerData tempData = container.GetContainerData();
-
-                    inventory.SlotList[index1].OverrideSlot(DroppedItem.GetContainerData());
-                    _slot.inventory.SlotList[index2].OverrideSlot(tempData);
+                    slot_Inventory.inventory.ClearSlot(index);
+                    inventory.AddItemToSlot(DroppedItem.data, index);
                 }
-                /*else if (DroppedItem.slot.TryGetComponent(out EquipmentSlot _))
-                {
-                    int equipmentIndex = DroppedItem.slot.GetSiblingIndex();
-                    //PlayerDataBase.RemoveEquippedItem(equipmentIndex);
-                    //PlayerDataBase.AddItem(eventData.pointerDrag.GetComponent<InventoryItem>());
-                }*/
-
-                //Destroy(eventData.pointerDrag);
+            }
+            else if (DroppedItem.slot.TryGetComponent(out EquipmentSlot slot_Equipment))
+            {
+                inventory.AddItemToSlot(DroppedItem.data, index);
+                slot_Equipment.ClearSlot();
+            }
+            else if (DroppedItem.slot.TryGetComponent(out UpgradeSlot slot_Upgrade))
+            {
+                inventory.AddItemToSlot(DroppedItem.data, index);
+                slot_Upgrade.ClearSlot();
             }
         }
     }

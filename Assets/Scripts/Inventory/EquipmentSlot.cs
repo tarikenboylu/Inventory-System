@@ -1,59 +1,56 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
 using UnityEngine.EventSystems;
 
 public class EquipmentSlot : Slot
 {
-    private Item _item;
-    public Item.ItemType slotType;
+    public ItemType slotType;
+    public EquipmentManager equipmentManager;
+    public int index;
+    private ItemData equippedItem;
 
-    public Item Item
+    private void Awake()
     {
-        get { return _item; }
-        set
-        {
-            if (value.type == slotType)
-                _item = value;
-            else
-                Debug.Log("Item type is not fit");
-        }
+        equipmentManager = transform.GetComponentInParent<EquipmentManager>();
+        index = transform.GetSiblingIndex();
+    }
+
+    public override void ClearSlot()
+    {
+        base.ClearSlot();
+        equippedItem = null;
+        equipmentManager.RemoveItem(index);
+    }
+
+    public void InsertItem(ItemData item)
+    {
+        equippedItem = item;
+        equipmentManager.EquipItem(index, item);
     }
 
     public override void OnDrop(PointerEventData eventData)
     {
-        if (eventData.pointerDrag != null)
+        if (eventData.pointerDrag == null) return;
+
+        if (eventData.pointerDrag.TryGetComponent(out Item DroppedItem))
         {
-            if (eventData.pointerDrag.TryGetComponent(out ItemSlotContainer DroppedItem))
+            if (DroppedItem.data.ItemTemplate.type != slotType) return;
+
+            if (DroppedItem.slot.TryGetComponent(out InventorySlot slot_Inventory))
             {
-                if (DroppedItem.item.type == slotType)
-                {
-                    if (DroppedItem.slot.TryGetComponent(out InventorySlot _))
-                    {
-                        int index2 = DroppedItem.slot.transform.GetSiblingIndex();
-                        int index1 = transform.GetSiblingIndex();
-                        //PlayerDataBase.RemoveItem(Item , 1);
-                    }
-                    else if (DroppedItem.slot.TryGetComponent(out EquipmentSlot _))
-                    {
-                        int equipmentIndex = DroppedItem.slot.transform.GetSiblingIndex();
-                        //PlayerDataBase.RemoveEquippedItem(equipmentIndex);
-                    }
-                    //PlayerDataBase.EquipItem();
+                if (equippedItem != null) slot_Inventory.inventory.AddItemToSlot(equippedItem, slot_Inventory.index);
 
-                    Destroy(eventData.pointerDrag);
-                    //Inventory.Instance.UpdateInventoryUI();
-                }
-                else
-                {
-
-                }
+                equipmentManager.EquipItem(index, DroppedItem.data);
+                slot_Inventory.inventory.ClearSlot(slot_Inventory.index);
+            }
+            else if (DroppedItem.slot.TryGetComponent(out EquipmentSlot slot_Equipment))
+            {
+                equipmentManager.EquipItem(index, DroppedItem.data);
+                slot_Equipment.equipmentManager.RemoveItem(slot_Equipment.index);
+            }
+            else if (DroppedItem.slot.TryGetComponent(out UpgradeSlot slot_Upgrade))
+            {
+                equipmentManager.EquipItem(index, DroppedItem.data);
+                slot_Upgrade.ClearSlot();
             }
         }
-    }
-
-    public override void InitSlot()
-    {
-        Debug.Log(Item.name + " equipped on " + slotType + " slot");
     }
 }

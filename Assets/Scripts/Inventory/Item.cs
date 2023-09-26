@@ -1,70 +1,67 @@
-using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using static ItemContainerData;
-using static InventorySettings;
+using UnityEngine.EventSystems;
 
-public class Item : MonoBehaviour
+[RequireComponent(typeof(Image)), RequireComponent(typeof(CanvasGroup))]
+public class Item : MonoBehaviour, IBeginDragHandler, IEndDragHandler, IDragHandler, /*IPointerDownHandler,*/ IPointerExitHandler, IPointerEnterHandler
 {
-    [SerializeField] private TextMeshProUGUI levelText;
-    [field : SerializeField]
-    public Attribute[] attributes { get; private set; }
-    public int durability { get; private set; }
-    public int upgradeLevel { get; private set; }
-    public int ID { get; private set; }
-    public Rarity rarity { get; private set; }
-    public bool countable => template.countable;
-    public bool upgradable => template.upgradable;
-    public ItemType type => template.type;
-    public int maxStackCount => template.maxStackCount;
-    private ItemTemplate.ItemRarityTemplate template => InventorySystemManager.GetItemWithID(ID).RarityTemplate(rarity);
+    public ItemData data { get; private set; }
+    [SerializeField] private CanvasGroup ItemCanvas;
+    [SerializeField] private Image itemImage;
+    [HideInInspector] public Slot slot;
+    [HideInInspector] public bool backToSlot;
 
-    public ItemData GetItemData() => new()
+    public void Override(ItemData _data)
     {
-        attributes = this.attributes,
-        durability = this.durability,
-        upgradeLevel = this.upgradeLevel,
-        ID = this.ID,
-        rarity = (int)this.rarity
-    };
+        if (_data == null)
+        {
+            data = null;
+            itemImage.enabled = false;
+            return;
+        }
 
-    public void OverrideItem(ItemData data)
-    {
-        attributes = data.attributes;
-        durability = data.durability;
-        upgradeLevel = data.upgradeLevel;
-        ID = data.ID;
-        rarity = (Rarity)data.rarity;
-        UpdateItem();
+        itemImage.enabled = true;
+        data = _data;
+        itemImage.sprite = _data.sprite;
     }
 
-    private void UpdateItem()
+    #region Drag-Drop
+
+    public void OnBeginDrag(PointerEventData _)
     {
-        GetComponent<Image>().color = template.itemUIColor;
-        levelText.text = "+" + upgradeLevel;
+        backToSlot = true;
+        transform.SetParent(GameObject.Find("Canvas").transform);
+        ItemCanvas.alpha = 0.6f;
+        ItemCanvas.blocksRaycasts = false;
     }
 
-    public void Upgrade(int amount = 1)
+    public void OnDrag(PointerEventData eventData)
     {
-        upgradeLevel += amount;
-        UpdateItem();
+        GetComponent<RectTransform>().anchoredPosition += eventData.delta / GameObject.Find("Canvas").GetComponent<Canvas>().scaleFactor;
     }
 
-    public enum ItemType
+    public void OnEndDrag(PointerEventData _)
     {
-        OneHandWeapon,
-        TwoHandWeapon,
-        Chest,
-        Head,
-        Boot,
-        Gloves,
-        Pants,
-        Ring,
-        Amulet,
-        Necklace,
-        Belt,
-        Earring,
-        Consumable,
-        Quest
+        ItemCanvas.alpha = 1;
+        ItemCanvas.blocksRaycasts = true;
+
+        if (backToSlot)
+        {
+            transform.SetParent(slot.transform);
+            transform.SetSiblingIndex(1);
+        }
+
+        GetComponent<RectTransform>().anchoredPosition = Vector2.zero;
     }
+
+    public void OnPointerEnter(PointerEventData _)
+    {
+        CursorInfo.Initialize(data);
+        Debug.Log(data.attributes.Length.ToString());
+        StartCoroutine(CursorInfo.TurnOnInfo(true));
+    }
+
+    public void OnPointerExit(PointerEventData _) => StartCoroutine(CursorInfo.TurnOnInfo(false));
+
+    #endregion
 }

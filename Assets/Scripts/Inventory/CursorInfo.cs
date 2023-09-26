@@ -6,59 +6,25 @@ using static InventorySettings;
 public class CursorInfo : MonoSingleton<CursorInfo>
 {
     [SerializeField] private TextMeshProUGUI ItemNameHeader;
-    [SerializeField] private Color CommonTextColor;
-    [SerializeField] private Color UncommonTextColor;
-    [SerializeField] private Color RareTextColor;
-    [SerializeField] private Color UniqueTextColor;
-    [SerializeField] private Color SetTextColor;
-    [SerializeField] private Color LegendaryTextColor;
 
-    private Rect panelRect;
-    private static Color CommonItemColor;
-    private static Color UncommonItemColor;
-    private static Color RareItemColor;
-    private static Color UniqueItemColor;
-    private static Color SetItemColor;
-    private static Color LegendaryItemColor;
-
-    private static TextMeshProUGUI headerText;
-    private static GameObject[] tempInfo;
+    private static TextMeshProUGUI NameText;
+    private static AttributeInfo[] tempInfo;
     private static Transform InfoTransform;
     private static CanvasGroup canvas;
 
-    private static string RarityColorHash(Rarity rarity)
-    {
-        return rarity switch
-        {
-            Rarity.Uncommon => ColorUtility.ToHtmlStringRGBA(UncommonItemColor),
-            Rarity.Rare => ColorUtility.ToHtmlStringRGBA(RareItemColor),
-            Rarity.Set => ColorUtility.ToHtmlStringRGBA(UniqueItemColor),
-            Rarity.Unique => ColorUtility.ToHtmlStringRGBA(SetItemColor),
-            Rarity.Legendary => ColorUtility.ToHtmlStringRGBA(LegendaryItemColor),
-            _ => ColorUtility.ToHtmlStringRGBA(CommonItemColor)
-        };
-    }
+    private static string RarityColorHash(Rarity rarity) => ColorUtility.ToHtmlStringRGBA(RarityColor(rarity));
 
     private void OnEnable()
     {
-        panelRect = GetComponent<RectTransform>().rect;
-
-        CommonItemColor = CommonTextColor;
-        UncommonItemColor = UncommonTextColor;
-        RareItemColor = RareTextColor;
-        UniqueItemColor = UniqueTextColor;
-        SetItemColor = SetTextColor;
-        LegendaryItemColor = LegendaryTextColor;
-
+        transform.SetAsLastSibling();
         canvas = GetComponent<CanvasGroup>();
         InfoTransform = transform;
-        headerText = ItemNameHeader;
+        NameText = ItemNameHeader;
     }
 
     private void FixedUpdate()
     {
-        if (GetComponent<CanvasGroup>().alpha > 0)
-            transform.position = Input.mousePosition + Vector3.right * (10 + panelRect.width / 4) + Vector3.down * (2 + panelRect.height / 4);
+        if (GetComponent<CanvasGroup>().alpha > 0) transform.position = Input.mousePosition;
     }
     
     public static IEnumerator TurnOnInfo(bool isOn, float _ShowOnTime = .6f)
@@ -80,20 +46,39 @@ public class CursorInfo : MonoSingleton<CursorInfo>
         yield return null;
     }
 
-    public static void Initialize(string ItemName, Rarity rarity, Attribute[] attribute)
+    public static void Initialize(ItemData item)
     {
         if (tempInfo != null)
-            foreach (var info in tempInfo) Destroy(info);
-        
-        tempInfo = new GameObject[attribute.Length];
+            foreach (var info in tempInfo) Destroy(info.gameObject);
 
-        Debug.Log(RarityColorHash(rarity));
-        headerText.text = $"<color=#{RarityColorHash(rarity)}><b>{ItemName}</b></color>";
-
-        for (int i = 0; i < attribute.Length; i++)
+        if (item.type == ItemType.OneHandWeapon || item.type == ItemType.TwoHandWeapon)
         {
-            tempInfo[i] = Instantiate(InventorySystemManager.AttributeInfoPrefab.gameObject, InfoTransform);
-            tempInfo[i].GetComponent<AttributeInfo>().Initialize(attribute[i]);
+            int minDamage = 0, maxDamage = 0;
+
+            for (int i = 0; i < item.attributes.Length; i++)
+            {
+                if (item.attributes[i].type == Attribute.Type.MinDamage) minDamage = item.attributes[i].Value(item.upgradeLevel);
+                if (item.attributes[i].type == Attribute.Type.MaxDamage) maxDamage = item.attributes[i].Value(item.upgradeLevel);
+            }
+
+            tempInfo = new AttributeInfo[item.attributes.Length - 1];
+
+            tempInfo[item.attributes.Length - 2] = Instantiate(InventorySystemManager.AttributeInfoPrefab, InfoTransform);
+            tempInfo[item.attributes.Length - 2].Edit("Damage", $"{minDamage}-{maxDamage}");
+        }
+        else
+            tempInfo = new AttributeInfo[item.attributes.Length];
+
+        NameText.text = $"<color=#{RarityColorHash((Rarity)item.rarity)}><b>{item.ItemTemplate.name} +{item.upgradeLevel}</b></color>";
+
+        for (int i = 0, k = 0; i < item.attributes.Length; i++)
+        {
+            if (item.attributes[i].type == Attribute.Type.MinDamage || item.attributes[i].type == Attribute.Type.MaxDamage) continue;
+
+            Attribute attribute = item.attributes[i];
+            tempInfo[k] = Instantiate(InventorySystemManager.AttributeInfoPrefab, InfoTransform);
+            tempInfo[k].Edit(attribute.type.ToString(), attribute.Value(item.upgradeLevel).ToString());
+            k++;
         }
     }
 }

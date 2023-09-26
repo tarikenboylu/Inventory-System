@@ -1,0 +1,77 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 93803424c6bf6e14d9cfd0f8593bb6cd, type: 3}
+  m_Name: Weapon
+  m_EditorClassIdentifier: 
+  itemSprite: {fileID: 21300000, guid: 8b99dcdee91493e40b92e3e3e769c5ac, type: 3}
+  type: 0
+  worldPrefab: {fileID: 0}
+  rarity: 4
+  itemObjectColor: {r: 0, g: 0, b: 0, a: 0}
+  itemUIColor: {r: 1, g: 1, b: 1, a: 1}
+  durability_Max: 100
+  maxStackCount: 1
+  price: 0
+  MarketPrice: 0
+  levelDropChance:
+  - objectName: 
+    possibility: 1
+    possibleObject: 1
+  UpgradeLevel_Max: 0
+  upgradable: 1
+  storable: 0
+  sellable: 0
+  possibleAttributesMinCount: 0
+  possibleAttributesMaxCount: 0
+  possibleAttributes:
+  - minValue: 3
+    maxValue: 5
+    attribute:
+      description: 
+      type: 0
+      activeWhile: 0
+      upgradeIncrement: 0
+      upgradePercentIncrement: 0
+  - minValue: 0
+    maxValue: 0
+    attribute:
+      description: 
+      type: 0
+      activeWhile: 0
+      upgradeIncrement: 0
+      upgradePercentIncrement: 0
+  characteristicAttributes:
+  - minValue: 3
+    maxValue: 5
+    attribute:
+      description: 
+      type: 7
+      activeWhile: 0
+      upgradeIncrement: 1
+      upgradePercentIncrement: 0
+  - minValue: 6
+    maxValue: 8
+    attribute:
+      description: 
+      type: 8
+      activeWhile: 0
+      upgradeIncrement: 1
+      upgradePercentIncrement: 0
+  - minValue: 10
+    maxValue: 10
+    attribute:
+      description: 
+      type: 2
+      activeWhile: 0
+      upgradeIncrement: 0
+      upgradePercentIncrement: 0
+  upgradeCost: 

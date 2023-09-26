@@ -56,8 +56,8 @@ public class Item : MonoBehaviour, IBeginDragHandler, IEndDragHandler, IDragHand
 
     public void OnPointerEnter(PointerEventData _)
     {
+        if (Input.GetMouseButton(0)) return;
         CursorInfo.Initialize(data);
-        Debug.Log(data.attributes.Length.ToString());
         StartCoroutine(CursorInfo.TurnOnInfo(true));
     }
 

@@ -3,6 +3,7 @@ using UnityEngine.AddressableAssets;
 using static Item;
 using static InventorySettings;
 using UnityEditor;
+using System.Collections.Generic;
 
 //[CreateAssetMenu(fileName = "New Item Template", menuName = "Item")]
 public class ItemTemplate : ScriptableObject
@@ -26,7 +27,7 @@ public class ItemTemplate : ScriptableObject
 
     public bool upgradable;
     public bool storable;
-    public bool sellable;
+    public bool merchantable;
 
     public int possibleAttributesMinCount;
     public int possibleAttributesMaxCount;
@@ -68,12 +69,29 @@ public class ItemTemplate : ScriptableObject
         for (int i = 0; i < characteristicAttributes.Length; i++)
             newAttributes[i] = characteristicAttributes[i].Attribute();
 
+        List<Attribute> extraAttributes = new();
         //It can roll same attribute more than one times... 
         for (int i = 0; i < extraAttributesCount; i++)
         {
-            int rollAttribute = Random.Range(0, possibleAttributes.Length);
-            newAttributes[characteristicAttributes.Length + i] = possibleAttributes[rollAttribute].Attribute();
+            int rollAttribute = 0;
+            bool sameAttributeExist = true;
+
+            while (sameAttributeExist)
+            {
+                sameAttributeExist = false;
+
+                rollAttribute = Random.Range(0, possibleAttributes.Length);
+
+                for (int a = 0; a < extraAttributes.Count && !sameAttributeExist; a++)
+                    if (extraAttributes[a].type == possibleAttributes[rollAttribute].Attribute().type)
+                        sameAttributeExist = true;
+            }
+
+            extraAttributes.Add(possibleAttributes[rollAttribute].Attribute());
         }
+
+        for (int i = 0; i < extraAttributes.Count; i++)
+            newAttributes[characteristicAttributes.Length + i] = extraAttributes[i];
 
         int _upgradeLevel = Randomization<int>.RandomObject(levelDropChance);
 
